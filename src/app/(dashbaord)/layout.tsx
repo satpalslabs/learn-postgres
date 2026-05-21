@@ -8,7 +8,7 @@ export default function DashboardLayout({
     return (
         <div className="flex min-h-screen">
             {/* SIDEBAR */}
-            <aside className="w-64 border-r p-6">
+            <aside className="w-64 shrink-0 border-r p-6 mr-6">
                 <h2 className="text-2xl font-bold mb-8">
                     Dashboard
                 </h2>

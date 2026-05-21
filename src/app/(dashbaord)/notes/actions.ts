@@ -1,20 +1,43 @@
 "use server";
 
-import sql from "@/lib/db";
 import { syncUser } from "@/lib/sync-user";
 import { revalidatePath } from "next/cache";
+import { db } from "../../../../db";
+import { notes } from "../../../../db/schema";
+import { and, eq } from "drizzle-orm";
+import { createNoteSchema } from "@/lib/validations/note";
 
 export async function createNote(
   formData: FormData
 ) {
   const auth = await syncUser()
-  const title = formData.get("title") as string;
-  const content = formData.get("content") as string;
 
-  await sql`
-    INSERT INTO notes (title, content, user_id)
-    VALUES (${title}, ${content}, ${auth?.id || ""})
-  `;
+  if (!auth) {
+    throw new Error("Unauthorized")
+  }
+
+  const rowData = {
+    title: formData.get("title") as string,
+    content: formData.get("content") as string
+  }
+
+  const validatedFields = createNoteSchema
+    .safeParse(
+      rowData
+    )
+
+  if (!validatedFields.success) {
+    throw new Error("Invalid FIelds")
+  }
+
+
+  const { title, content } = validatedFields.data;
+
+  await db.insert(notes).values({
+    title,
+    content,
+    userId: Number(auth?.id)
+  });
 
   revalidatePath("/notes");
 }
@@ -25,11 +48,7 @@ export async function deleteNote(
   const id = formData.get("id") as string;
   const dbUser = await syncUser();
 
-  await sql`
-    DELETE FROM notes
-    WHERE id = ${id} AND user_id = ${dbUser?.id || ""} 
-  `;
-
+  await db.delete(notes).where(and(eq(notes.id, Number(id)), eq(notes.userId, Number(dbUser?.id))))
   revalidatePath("/notes");
 }
 export async function editNote(
@@ -40,10 +59,11 @@ export async function editNote(
   const content = formData.get("content") as string;
   const dbUser = await syncUser();
 
-  await sql`
-    UPDATE notes SET title = ${title}, content = ${content}
-    WHERE id = ${id} AND user_id = ${dbUser?.id || ""}                  
-  `;
+
+  await db.update(notes).set({
+    title, content
+  }).where(and(eq(notes.id, Number(id)), eq(notes.userId, Number(dbUser?.id))))
+
 
   revalidatePath("/notes");
 }

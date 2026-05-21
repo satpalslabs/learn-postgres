@@ -6,4 +6,4 @@ export default function SettingsPage() {
             </h1>
         </div>
     );
-}
+} ``

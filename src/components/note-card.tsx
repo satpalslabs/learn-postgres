@@ -1,8 +1,8 @@
-import { Note } from '../../types/notes'
 import Link from 'next/link'
 import { deleteNote } from '@/app/(dashbaord)/notes/actions'
+import { notes as NoteSchema } from '../../db/schema';
 
-const NoteCard = ({ note }: { note: Note }) => {
+const NoteCard = ({ note }: { note: typeof NoteSchema.$inferSelect }) => {
     return (
         <div
             key={note.id}

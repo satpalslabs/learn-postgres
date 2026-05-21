@@ -1,12 +1,12 @@
 export type Note = {
   id: number;
   title: string;
-  content: string;
-  created_at: string;
+  content: string | null;
+  createdAt: Date | null;
 };
 
 export type User = {
   id: number;
-  clerk_id: string;
+  clerkId: string;
   email: string;
 }
