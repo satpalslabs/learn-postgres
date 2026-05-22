@@ -1,7 +1,7 @@
-import { Note } from "../../types/notes";
+import { Note } from "../types/notes";
 import { syncUser } from "./sync-user";
-import { db } from "../../db";
-import { notes } from "../../db/schema";
+import { db } from "../db";
+import { notes } from "../db/schema";
 import { and, desc, eq } from "drizzle-orm";
 
 export async function getNotes(): Promise<Note[]> {

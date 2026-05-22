@@ -44,3 +44,22 @@ export const notes = pgTable(
         ).defaultNow(),
     }
 );
+
+export const activityLogs = pgTable(
+    "activity_logs",
+    {
+        id: serial("id")
+            .primaryKey(),
+
+        action: text("action")
+            .notNull(),
+
+        userId: integer("user_id")
+            .references(() => users.id)
+            .notNull(),
+
+        createdAt: timestamp(
+            "created_at"
+        ).defaultNow(),
+    }
+);

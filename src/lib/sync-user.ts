@@ -1,6 +1,6 @@
-import { db } from "../../db";
-import { users } from "../../db/schema";
-import { User } from "../../types/notes";
+import { db } from "../db";
+import { users } from "../db/schema";
+import { User } from "../types/notes";
 import { currentUser } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
 

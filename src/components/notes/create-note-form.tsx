@@ -1,28 +1,31 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-
 import { zodResolver } from "@hookform/resolvers/zod";
-
 import { z } from "zod";
-
 import { createNoteSchema } from "@/lib/validations/note";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
-import { createNote } from "@/actions/notes";
 import { useRouter } from "next/navigation";
+import { Note } from "@/types/notes";
+import { startTransition } from "react";
+import { toast } from "sonner";
+import { createNote } from "@/actions/notes-actions";
 
 type CreateNoteValues =
     z.infer<typeof createNoteSchema>;
 
 
-const NoteForm = () => {
+const NoteForm = ({
+    addOptimisticNote
+}: {
+    addOptimisticNote: (note: Note) => void
+}) => {
     const router = useRouter()
     const form = useForm<CreateNoteValues>({
         resolver: zodResolver(
             createNoteSchema
         ),
-
         defaultValues: {
             title: "",
             content: "",
@@ -38,13 +41,32 @@ const NoteForm = () => {
     async function onSubmit(
         values: CreateNoteValues
     ) {
-        try {
+        const optimisticNote = {
+            id: Date.now(),
+            title: values.title,
+            content: values.content,
+            createdAt:
+                new Date(),
+        };
+        startTransition(() =>
+            addOptimisticNote(
+                optimisticNote
+            )
+        )
+        const response =
             await createNote(values);
-            router.refresh()
-            form.reset()
-        } catch (er) {
-            console.log(er)
+
+        if (!response.success) {
+            toast.error(response.error);
+            return;
         }
+
+        router.refresh()
+        form.reset();
+        toast.success(
+            "Note created"
+        );
+
 
     }
 

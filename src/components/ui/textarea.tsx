@@ -16,7 +16,7 @@ export function Textarea({
 
             <textarea
                 {...props}
-                className="w-full border rounded p-2"
+                className="w-full border rounded p-2 min-h-[300px]"
             />
 
             {error && (

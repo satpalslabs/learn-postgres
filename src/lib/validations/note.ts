@@ -8,5 +8,5 @@ export const createNoteSchema = z.object({
     content: z
         .string()
         .min(1, "Content required")
-        .max(1000),
+        .max(5000),
 })

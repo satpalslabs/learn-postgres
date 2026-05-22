@@ -1,46 +1,25 @@
-import { editNote } from "../../actions";
 import { getNoteById } from "@/lib/queries";
+import EditNoteForm from "@/components/notes/edit-note-form";
+import { notFound } from "next/navigation";
 
-export default async function NotesPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function EditNotePage({
+    params,
+}: {
+    params: Promise<{ id: string }>;
+}) {
     const { id } = await params;
-    const result = await getNoteById(id)
+    const note = await getNoteById(id);
+
+    if (!note) {
+        notFound();
+    }
 
     return (
         <main className="p-10">
             <h1 className="text-3xl font-bold mb-6">
                 Edit Note
             </h1>
-
-            <form
-                action={editNote}
-                className="space-y-4 mb-10"
-            >
-
-                <input
-                    name="id"
-                    className="hidden"
-                    defaultValue={result.id}
-                />
-                <input
-                    name="title"
-                    placeholder="Title"
-                    className="border p-2 w-full"
-                    defaultValue={result.title}
-                />
-
-                <textarea
-                    name="content"
-                    placeholder="Content"
-                    defaultValue={result.content}
-                    className="border p-2 w-full"
-                />
-
-                <button
-                    className="bg-black text-white px-4 py-2 rounded"
-                >
-                    Update Note
-                </button>
-            </form>
+            <EditNoteForm note={note} />
         </main>
-    )
+    );
 }
