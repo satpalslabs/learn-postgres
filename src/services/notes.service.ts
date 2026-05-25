@@ -2,7 +2,8 @@
 
 import { db } from "@/db"
 import { activityLogs, notes } from "@/db/schema"
-import { and, asc, eq } from "drizzle-orm"
+import { pusherServer } from "@/lib/pusher";
+import { and, asc, desc, eq, lt } from "drizzle-orm"
 import { revalidatePath } from "next/cache";
 
 type CreateNoteServiceInput = {
@@ -11,14 +12,24 @@ type CreateNoteServiceInput = {
     userId: number
 }
 
-const getNoteByUserId = async (userId: number) => {
+const getNoteByUserId = async (userId: number, cursor?: number, limit: number = 10) => {
     const dbNotes = await db
         .select()
         .from(notes)
-        .where(eq(notes.userId, userId))
-        .orderBy(asc(notes.createdAt))
+        .where(cursor ? and(
+            eq(notes.userId, userId),
+            lt(notes.id, cursor)
+        ) : eq(notes.userId, userId))
+        .orderBy(desc(notes.id))
+        .limit(limit)
+    console.log(dbNotes)
 
-    return dbNotes
+    const nextCursor =
+        dbNotes.length === limit
+            ? dbNotes[dbNotes.length - 1].id
+            : null;
+
+    return { dbNotes, nextCursor }
 }
 
 
@@ -46,6 +57,11 @@ const createNoteService = async ({
 
                     userId,
                 });
+            await pusherServer.trigger(
+                "notes-channel",
+                "note-created",
+                insertedNotes[0]
+            );
 
             return insertedNotes[0];
         })

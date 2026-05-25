@@ -115,17 +115,9 @@ async function editNote(
 
 const getNotes = async () => {
     try {
-        const dbUser = await syncUser();
-        if (!dbUser) {
-            throw new Error("Unauthorized")
-        }
-        const notes = await getNoteByUserId(dbUser.id)
-
-        return {
-            success: true,
-            data: notes as unknown as Note[],
-        };
-
+        const notes = await fetch("/api/notes")
+        const data = await notes.json()
+        return data;
     } catch (er) {
         console.log(er)
         return {
